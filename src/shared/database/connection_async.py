@@ -11,9 +11,12 @@ def get_async_engine():
 
 
 async_engine = get_async_engine()
-AsyncSessionFactory = async_sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=async_engine)
+AsyncSessionFactory = async_sessionmaker(
+    autocommit=False, autoflush=False, expire_on_commit=False, bind=async_engine
+)
 
 
+# 비동기 generator 반환
 async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
     db = AsyncSessionFactory()
     try:
