@@ -61,24 +61,43 @@ async def websocket_handler(websocket: WebSocket, client_id: int):
 # 동기식) 외부 API 요청
 @app.get("/sync/posts")
 def get_posts_sync_handler():
-    response = requests.get(
+    start_time = time.perf_counter()
+
+    urls = [
         "https://jsonplaceholder.typicode.com/posts",
-    )
-    response.raise_for_status()
-    return response.json()
+        "https://jsonplaceholder.typicode.com/posts",
+        "https://jsonplaceholder.typicode.com/posts",
+    ]
+    responses = []
+
+    for url in urls:
+        responses.append(requests.get(url))
+
+    end_time = time.perf_counter()
+    return {"duration": end_time - start_time}  # API 동작 시간 측정
+    # return [response.json() for response in responses]
 
 
 # 비동기식) 외부 API 요청
 @app.get("/async/posts")
 async def get_posts_async_handler():
+    start_time = time.perf_counter()
+
+    urls = [
+        "https://jsonplaceholder.typicode.com/posts",
+        "https://jsonplaceholder.typicode.com/posts",
+        "https://jsonplaceholder.typicode.com/posts",
+    ]
 
     async with httpx.AsyncClient() as client:  # client 객체 생성
-        # 외부 API 서버에 http 요청 (I/O 대기 발생)
-        response = await client.get(
-            "https://jsonplaceholder.typicode.com/posts",
-        )
-        response.raise_for_status()
-        return response.json()
+        task = [client.get(url) for url in urls]
+
+        # 동시에 다수의 요청을 해야하는 경우 (I/O 대기 발생)
+        responses = await asyncio.gather(*task)
+
+    end_time = time.perf_counter()
+    return {"duration": end_time - start_time}  # API 동작 시간 측정
+    # return [response.json() for response in responses]
 
 
 # 동기 Sleep 핸들러
