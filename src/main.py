@@ -4,6 +4,8 @@ from contextlib import asynccontextmanager
 from typing import Iterator
 
 import anyio
+import httpx  # 비동기 방식을 지원하는 HTTP 라이브러리
+import requests
 from fastapi import FastAPI, WebSocket
 from starlette.responses import HTMLResponse
 from starlette.websockets import WebSocketDisconnect
@@ -54,6 +56,29 @@ async def websocket_handler(websocket: WebSocket, client_id: int):
             # await message_broker.publish(client_id=client_id, message=message)
     except WebSocketDisconnect:
         ws_manager.disconnect(websocket, client_id)  # 클라이언트 연결 해제
+
+
+# 동기식) 외부 API 요청
+@app.get("/sync/posts")
+def get_posts_sync_handler():
+    response = requests.get(
+        "https://jsonplaceholder.typicode.com/posts",
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+# 비동기식) 외부 API 요청
+@app.get("/async/posts")
+async def get_posts_async_handler():
+
+    async with httpx.AsyncClient() as client:  # client 객체 생성
+        # 외부 API 서버에 http 요청 (I/O 대기 발생)
+        response = await client.get(
+            "https://jsonplaceholder.typicode.com/posts",
+        )
+        response.raise_for_status()
+        return response.json()
 
 
 # 동기 Sleep 핸들러
