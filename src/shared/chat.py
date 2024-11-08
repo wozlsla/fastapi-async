@@ -1,5 +1,6 @@
 from shared.config import SERVER_PORT
 
+# Chat 화면
 html = """
 <!DOCTYPE html>
 <html>
@@ -50,14 +51,21 @@ html = """
         </ul>
         </div>
 
-        <script>
+        <script> <!-- WebSocket 통신 (실시간 메시지 송수신) -->
+            
+            // WebSocket 클라이언트 ID 생성 (현재 시각의 Unix time)
             var client_id = Date.now()
             document.querySelector("#ws-id").textContent = client_id
+
+            // WebSocket 연결 설정
             var ws = new WebSocket(`ws://localhost:PORT/ws/${client_id}`);
+
+            // 클라이언트가 서버로부터 메시지를 수신하면 화면에 메세지 표시
             ws.onmessage = function(event) {
                 var messages = document.getElementById('messages');
                 var message = document.createElement('li');
 
+                // 내가 작성한 메세지 : 오른쪽, 다른 사람 메세지 : 왼쪽
                 if (event.data.startsWith("<Me>")) {
                     var content = document.createTextNode(event.data.replace("<Me>", ""));
                     message.classList.add('my-message');
@@ -69,6 +77,7 @@ html = """
                 message.appendChild(content);
                 messages.appendChild(message);
         };
+            // Form에서 메세지를 입력하면 호출 됨, 서버로 메세지 전달
             function sendMessage(event) {
                 var input = document.getElementById("messageText")
                 ws.send(input.value)
@@ -78,4 +87,6 @@ html = """
         </script>
     </body>
 </html>
-""".replace("PORT", SERVER_PORT)
+""".replace(
+    "PORT", SERVER_PORT
+)
