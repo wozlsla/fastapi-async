@@ -2,6 +2,9 @@
 - Backend: FastAPI
 - Database: PostgreSQL
 - Message Broker: Redis Pub/Sub
+
+비동기식 변환  
+[src/main.py](https://github.com/wozlsla/fastapi-async/blob/prac/src/main.py)
 </br>
 </br>
 
