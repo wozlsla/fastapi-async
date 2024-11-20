@@ -21,9 +21,12 @@ from user.sync_api import router as user_sync_router
 # 애플리케이션의 수명 주기를 관리하는 비동기 함수
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> Iterator[None]:
-    # 애플리케이션의 스레드 제한을 조정
+    """
+    lifespan : 처음 fastapi가 동작하는 시점에 특정 동작 수행 가능
+    """
+    # 애플리케이션의 스레드 제한을 조정 (anyio: 기본적으로 thread pool의 개수를 40개로 제한)
     limiter = anyio.to_thread.current_default_thread_limiter()
-    limiter.total_tokens = 200  # 최대 200개의 스레드 생성 가능
+    limiter.total_tokens = 200  # tread pool size 조정
     yield  # yield를 통해 수명 주기 관리에 필요한 설정을 적용
 
 
@@ -109,6 +112,11 @@ async def get_posts_async_handler():
     end_time = time.perf_counter()
     return {"duration": end_time - start_time}  # API 동작 시간 측정
     # return [response.json() for response in responses]
+
+
+# API 성능 Test
+# wrk -c 100 -d 100 http://127.0.0.1:8000/sync/sleep
+# wrk -c 100 -d 100 http://127.0.0.1:8000/async/sleep
 
 
 # 동기 Sleep 핸들러
