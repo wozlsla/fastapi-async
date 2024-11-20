@@ -15,7 +15,7 @@ class MessagePayload(TypedDict):
 
 
 class MessageBroker:
-    CHANNEL_NAME: ClassVar[str] = "openchat"  # 채널 - 클래스변수?
+    CHANNEL_NAME: ClassVar[str] = "openchat"
 
     def __init__(self):
         # client 속성 정의
@@ -31,10 +31,11 @@ class MessageBroker:
         broker = cls()  # message brocker 인스턴스 생성
 
         # _subscribe()를 ensure_future()를 통해 호출
-        # ensure_future(): 작업 예약 후, 결과를 기다리지 않고 다른 작업 수행 가능
+        # ensure_future(): 이벤트 루프에 작업 예약 후, 결과를 기다리지 않고 다른 작업 수행 가능
         asyncio.ensure_future(broker._subscribe())
         return broker
 
+    # pubsub을 통해 openchat chenn의 메시지를 publish -> chenn을 구독하고있는 모든 구독자에게 메시지 전달
     async def publish(self, client_id: int, message: str):
         payload: MessagePayload = MessagePayload(client_id=client_id, message=message)
         await self.client.publish(
@@ -42,7 +43,7 @@ class MessageBroker:
         )
 
     async def _subscribe(self):
-        pubsub: PubSub = self.client.pubsub()  # pubsub 객체 생성
+        pubsub: PubSub = self.client.pubsub()  # client를 통해 pubsub 객체 생성
         await pubsub.subscribe(self.CHANNEL_NAME)  # message 수신할 채널을 구독
         # _read_message()을 ensure_future()를 통해 호출
         asyncio.ensure_future(self._read_message(pubsub=pubsub))
@@ -63,4 +64,5 @@ class MessageBroker:
                 )
 
 
-# message_broker = MessageBroker.init()
+# 메시지 브로커 생성
+message_broker = MessageBroker.init()
