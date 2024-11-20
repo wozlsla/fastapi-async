@@ -35,7 +35,7 @@ class MessageBroker:
         asyncio.ensure_future(broker._subscribe())
         return broker
 
-    # pubsub을 통해 openchat chenn의 메시지를 publish -> chenn을 구독하고있는 모든 구독자에게 메시지 전달
+    # pubsub을 통해 openchat channel의 메시지를 publish -> channel을 구독하고있는 모든 구독자에게 메시지 전달
     async def publish(self, client_id: int, message: str):
         payload: MessagePayload = MessagePayload(client_id=client_id, message=message)
         await self.client.publish(

@@ -12,7 +12,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from shared.chat import html
 
-# from shared.message_broker import message_broker
+from shared.message_broker import message_broker
 from shared.websocket import ws_manager  # 웹소켓 요청 관리
 from user.async_api import router as user_async_router
 from user.sync_api import router as user_sync_router
@@ -61,8 +61,8 @@ async def websocket_handler(websocket: WebSocket, client_id: int):
             message = await websocket.receive_text()
 
             # 새로운 메세지가 들어오면 broadcast 메서드를 통해 모든 클라이언트에게 전달
-            await ws_manager.broadcast(sender_client_id=client_id, message=message)
-            # await message_broker.publish(client_id=client_id, message=message)
+            # await ws_manager.broadcast(sender_client_id=client_id, message=message)
+            await message_broker.publish(client_id=client_id, message=message)
 
     except WebSocketDisconnect:  # 웹소켓 연결 종료
         # 클라이언트 연결 해제. 활성 연결 리스트(connections list)에서 제거
